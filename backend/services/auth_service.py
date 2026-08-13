@@ -1,20 +1,15 @@
 from datetime import datetime, timedelta, timezone
 import os
 
-from dotenv import load_dotenv
 from jose import JWTError, jwt
 from pwdlib import PasswordHash
 from sqlalchemy.orm import Session
 
 from models.db_models import User
-
-
-load_dotenv()
-
+from config import settings
 
 password_hash = PasswordHash.recommended()
 
-SECRET_KEY = os.getenv("AUTH_SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
@@ -32,12 +27,12 @@ def create_access_token(user_id: int) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {"sub": str(user_id), "exp": expire,}
 
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(payload, settings.auth_secret_key, algorithm=ALGORITHM)
 
 
 def decode_access_token(token: str) -> int:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.auth_secret_key, algorithms=[ALGORITHM])
         user_id = payload.get("sub")
 
         if user_id is None:
