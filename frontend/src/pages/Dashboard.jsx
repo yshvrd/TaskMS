@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
-import { ListTodo, Clock, Zap, BadgeCheck, AlertOctagon, ArrowRight } from 'lucide-react';
+import { ListTodo, Clock, Zap, BadgeCheck, AlertOctagon, ArrowRight, Quote } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { StatusBadge } from '../components/ui/Badges';
@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [recentTasks, setRecentTasks] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [advice, setAdvice] = useState({ text: '', loading: true });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -39,7 +40,19 @@ const Dashboard = () => {
         setUser(userRes.data);
       } catch (error) {} finally { setLoading(false); }
     };
+
+    const fetchExternalAdvice = async () => {
+      try {
+        // Now fetching from OUR backend, not directly from the external API
+        const response = await api.get('/external/advice');
+        setAdvice({ text: response.data.text, loading: false });
+      } catch (error) {
+        setAdvice({ text: "Stay focused and keep shipping great work.", loading: false });
+      }
+    };
+
     fetchDashboardData();
+    fetchExternalAdvice();
   }, []);
 
   if (loading) return <div className="animate-pulse space-y-8"><div className="h-40 bg-slate-200 dark:bg-slate-800 rounded-2xl w-full"></div></div>;
@@ -48,13 +61,29 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-900 dark:to-purple-900 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
-        <div className="relative z-10 w-full overflow-hidden">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-900 dark:to-purple-900 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 transition-colors">
+        <div className="relative z-10 w-full md:w-1/2 overflow-hidden">
           <h1 className="text-3xl font-bold mb-2">Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}! 👋</h1>
           <p className="text-indigo-100 text-lg truncate whitespace-nowrap w-full">
             You have {activeTasksCount} active {activeTasksCount === 1 ? 'task' : 'tasks'} requiring your attention today. Let's make it a productive day.
           </p>
         </div>
+
+        {/* External API Integration UI */}
+        <div className="relative z-10 w-full md:w-1/3 bg-white/10 dark:bg-black/20 backdrop-blur-md rounded-2xl p-4 border border-white/20 dark:border-white/10">
+          <div className="flex items-start gap-3">
+            <Quote className="h-5 w-5 text-indigo-200 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs text-indigo-200 font-semibold uppercase tracking-wider mb-1">Daily Motivation</p>
+              {advice.loading ? (
+                <div className="h-4 w-3/4 bg-white/20 rounded animate-pulse"></div>
+              ) : (
+                <p className="text-sm text-white font-medium leading-relaxed">"{advice.text}"</p>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="absolute right-0 top-0 w-64 h-64 bg-white dark:bg-black opacity-10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
       </div>
 
