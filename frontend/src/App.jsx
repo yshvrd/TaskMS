@@ -6,6 +6,7 @@ import TaskList from './pages/TaskList';
 import TaskDetails from './pages/TaskDetails';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
+import Users from './pages/Users';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/tasks" element={<TaskList />} />
             <Route path="/tasks/:id" element={<TaskDetails />} />
+            <Route path="/users" element={<Users />} />
           </Route>
         </Route>
       </Routes>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, CheckSquare, LogOut, User, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, LogOut, User, Sun, Moon, Users as UsersIcon } from 'lucide-react';
 import api from '../services/api';
 
 const Layout = () => {
@@ -35,10 +35,15 @@ const Layout = () => {
     }
   };
 
+  // Safely build the navigation array based on user role
   const navItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
     { name: 'Tasks', path: '/tasks', icon: CheckSquare },
   ];
+
+  if (user?.role === 'admin' || user?.role === 'superadmin') {
+    navItems.push({ name: 'Users', path: '/users', icon: UsersIcon });
+  }
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
