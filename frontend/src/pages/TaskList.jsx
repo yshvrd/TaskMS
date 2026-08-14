@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Search, Plus, Filter, Calendar, User, LayoutList } from 'lucide-react';
+import { 
+  Search, Plus, Filter, Calendar, User, LayoutList, 
+  ChevronLeft, ChevronRight, ArrowUpDown 
+} from 'lucide-react';
 import api from '../services/api';
 import { StatusBadge, PriorityBadge } from '../components/ui/Badges';
 import { Button } from '../components/ui/Button';
 import TaskModal from '../components/TaskModal';
 
-// A sleek skeleton loader for the table
 const TableSkeleton = ({ columns }) => (
   <div className="animate-pulse space-y-0 py-2">
     {[...Array(5)].map((_, i) => (
@@ -41,8 +43,17 @@ const TaskList = () => {
   
   // URL States for filtering/pagination
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [limit] = useState(7); // Items per page
+  
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+  const [priority, setPriority] = useState('');
+  const [assignee, setAssignee] = useState('');
+  
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState('desc');
 
   // Initialization: Get user role and mapped names if admin
   useEffect(() => {
@@ -76,12 +87,22 @@ const TaskList = () => {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({ page, limit: 15 });
+      const params = new URLSearchParams({ 
+        page, 
+        limit,
+        sort_by: sortBy,
+        sort_order: sortOrder
+      });
+      
       if (search) params.append('search', search);
       if (status) params.append('status', status);
+      if (priority) params.append('priority', priority);
+      if (assignee) params.append('assignee', assignee);
 
       const response = await api.get(`/tasks/?${params.toString()}`);
       setTasks(response.data.items);
+      setTotalPages(response.data.pages);
+      setTotalItems(response.data.total);
     } catch (error) {
       console.error("Failed to fetch tasks", error);
     } finally {
@@ -89,19 +110,38 @@ const TaskList = () => {
     }
   };
 
-  // Debounced Search effect
+  // Debounced Search & Filter effect
   useEffect(() => {
-    if (initLoading) return; // Wait for auth check before fetching tasks
+    if (initLoading) return;
     const delayDebounceFn = setTimeout(() => { fetchTasks(); }, 300);
     return () => clearTimeout(delayDebounceFn);
-  }, [search, status, page, initLoading]);
+  }, [search, status, priority, assignee, sortBy, sortOrder, page, initLoading]);
+
+  // Reset page to 1 when filters change
+  const handleFilterChange = (setter) => (e) => {
+    setter(e.target.value);
+    setPage(1);
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
+    setPage(1);
+  };
 
   const isAdmin = currentUser?.role === 'admin';
   const tableColumns = isAdmin ? 5 : 4;
 
+  // Pagination Math
+  const startItem = (page - 1) * limit + 1;
+  const endItem = Math.min(page * limit, totalItems);
+
   if (initLoading) {
     return <div className="p-8 text-slate-500 animate-pulse">Loading workspace...</div>;
   }
+
+  // Common styles for select dropdowns
+  const selectStyle = "bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-sm focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 cursor-pointer text-slate-700 font-medium transition-all outline-none appearance-none pr-8";
+  const selectBgImage = { backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -111,42 +151,77 @@ const TaskList = () => {
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Task Management</h1>
           <p className="text-sm text-slate-500 mt-1">Create, assign, and track your team's progress.</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} className="shadow-sm shadow-indigo-200 hover:shadow-md transition-all active:scale-95">
+        <Button onClick={() => setIsModalOpen(true)} className="shadow-sm shadow-indigo-200 hover:shadow-md transition-all active:scale-95 shrink-0">
           <Plus className="h-4 w-4 mr-2" /> Create Task
         </Button>
       </div>
 
-      {/* Control Bar (Search & Filters) */}
-      <div className="bg-white p-2.5 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-3 items-center">
-        <div className="relative flex-1 w-full flex items-center">
+      {/* Control Bar (Search, Filters, Sorting) */}
+      <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-200 flex flex-col xl:flex-row gap-3">
+        
+        {/* Search */}
+        <div className="relative flex-1 min-w-[250px] flex items-center">
           <Search className="absolute left-4 h-4 w-4 text-slate-400" />
           <input
             type="text"
             placeholder="Search by task name..."
-            className="w-full pl-11 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm placeholder:text-slate-400 focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 transition-all outline-none"
+            className="w-full pl-11 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 transition-all outline-none"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={handleFilterChange(setSearch)}
           />
         </div>
-        <div className="w-full sm:w-auto flex items-center px-1">
-          <Filter className="h-4 w-4 text-slate-400 mr-2 shrink-0" />
-          <select 
-            className="w-full sm:w-auto bg-slate-50 border border-slate-100 rounded-xl py-2 px-3 text-sm focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 cursor-pointer text-slate-700 font-medium transition-all outline-none appearance-none pr-8 relative"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
-          >
-            <option value="">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-            <option value="blocked">Blocked</option>
+
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Status Filter */}
+          <div className="flex items-center">
+            <Filter className="h-4 w-4 text-slate-400 mr-2 shrink-0 hidden sm:block" />
+            <select className={selectStyle} style={selectBgImage} value={status} onChange={handleFilterChange(setStatus)}>
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="blocked">Blocked</option>
+            </select>
+          </div>
+
+          {/* Priority Filter */}
+          <select className={selectStyle} style={selectBgImage} value={priority} onChange={handleFilterChange(setPriority)}>
+            <option value="">All Priorities</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
           </select>
+
+          {/* Assignee Filter (Admin Only) */}
+          {isAdmin && (
+            <select className={selectStyle} style={selectBgImage} value={assignee} onChange={handleFilterChange(setAssignee)}>
+              <option value="">All Assignees</option>
+              <option value="me">Assigned to Me</option>
+              {Object.entries(usersMap).map(([id, name]) => (
+                <option key={id} value={id}>{name}</option>
+              ))}
+            </select>
+          )}
+
+          {/* Sorting */}
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl p-1 pl-3">
+            <span className="text-xs font-semibold text-slate-500 uppercase">Sort</span>
+            <select className="bg-transparent border-none text-sm focus:ring-0 cursor-pointer text-slate-700 font-medium transition-all outline-none appearance-none pr-6 py-1" style={selectBgImage} value={sortBy} onChange={handleFilterChange(setSortBy)}>
+              <option value="created_at">Created Date</option>
+              <option value="due_date">Due Date</option>
+              <option value="priority">Priority</option>
+              <option value="status">Status</option>
+            </select>
+            <button onClick={toggleSortOrder} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 transition-colors" title={`Sort ${sortOrder === 'desc' ? 'Ascending' : 'Descending'}`}>
+              <ArrowUpDown className={`h-4 w-4 transition-transform ${sortOrder === 'asc' ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Data Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-slate-50/80">
@@ -154,9 +229,7 @@ const TaskList = () => {
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Task Info</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Priority</th>
-                {isAdmin && (
-                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Assigned To</th>
-                )}
+                {isAdmin && <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Assigned To</th>}
                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Due Date</th>
               </tr>
             </thead>
@@ -175,7 +248,6 @@ const TaskList = () => {
                 </tr>
               ) : (
                 tasks.map((task) => {
-                  // Determine display name for avatar & column
                   const assigneeName = isAdmin 
                     ? (usersMap[task.assigned_to] || 'Unassigned') 
                     : (currentUser?.name || 'Me');
@@ -193,7 +265,7 @@ const TaskList = () => {
                             {initials}
                           </div>
                           <div>
-                            <div className="text-sm font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors">{task.title}</div>
+                            <div className="text-sm font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors truncate max-w-[200px] sm:max-w-[300px]">{task.title}</div>
                             <div className="text-xs text-slate-500 mt-0.5 font-medium">Created {format(new Date(task.created_at), 'MMM dd')}</div>
                           </div>
                         </div>
@@ -208,15 +280,15 @@ const TaskList = () => {
                       {isAdmin && (
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center text-sm font-medium text-slate-700">
-                            <User className="h-4 w-4 mr-2 text-slate-400" />
-                            {assigneeName}
+                            <User className="h-4 w-4 mr-2 text-slate-400 shrink-0" />
+                            <span className="truncate max-w-[120px]">{assigneeName}</span>
                           </div>
                         </td>
                       )}
 
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center text-sm font-medium text-slate-600">
-                          <Calendar className="h-4 w-4 mr-2 text-slate-400" />
+                          <Calendar className="h-4 w-4 mr-2 text-slate-400 shrink-0" />
                           {task.due_date ? format(new Date(task.due_date), 'MMM dd, yyyy') : <span className="text-slate-400">No date</span>}
                         </div>
                       </td>
@@ -227,6 +299,34 @@ const TaskList = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Footer */}
+        {!loading && tasks.length > 0 && (
+          <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-slate-500 font-medium">
+              Showing <span className="font-semibold text-slate-900">{startItem}</span> to <span className="font-semibold text-slate-900">{endItem}</span> of <span className="font-semibold text-slate-900">{totalItems}</span> results
+            </div>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="inline-flex items-center px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+              </button>
+              <div className="px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg shadow-sm">
+                Page {page} of {totalPages}
+              </div>
+              <button 
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="inline-flex items-center px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+              >
+                Next <ChevronRight className="h-4 w-4 ml-1" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <TaskModal 
