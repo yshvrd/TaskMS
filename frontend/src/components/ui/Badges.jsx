@@ -1,35 +1,35 @@
 import React from 'react';
 
-const statusColors = {
-  pending: 'bg-gray-100 text-gray-800 border-gray-200',
-  in_progress: 'bg-blue-100 text-blue-800 border-blue-200',
-  completed: 'bg-green-100 text-green-800 border-green-200',
-  blocked: 'bg-red-100 text-red-800 border-red-200',
-};
-
-const priorityColors = {
-  low: 'bg-slate-100 text-slate-700',
-  medium: 'bg-yellow-100 text-yellow-800',
-  high: 'bg-orange-100 text-orange-800',
-  urgent: 'bg-red-100 text-red-800 font-bold',
-};
-
 export const StatusBadge = ({ status }) => {
-  const colorClass = statusColors[status?.toLowerCase()] || statusColors.pending;
-  const label = status?.replace('_', ' ').toUpperCase() || 'UNKNOWN';
+  const styles = {
+    pending: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20",
+    in_progress: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20",
+    completed: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
+    blocked: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20"
+  };
+  
+  const currentStyle = styles[status?.toLowerCase()] || styles.pending;
   
   return (
-    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClass}`}>
-      {label}
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border shadow-sm ${currentStyle}`}>
+      {status?.replace('_', ' ').toUpperCase() || 'UNKNOWN'}
     </span>
   );
 };
 
 export const PriorityBadge = ({ priority }) => {
-  const colorClass = priorityColors[priority?.toLowerCase()] || priorityColors.low;
+  const styles = {
+    low: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20",
+    medium: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20",
+    high: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20",
+    urgent: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20"
+  };
+  
+  const currentStyle = styles[priority?.toLowerCase()] || styles.low;
+
   return (
-    <span className={`px-2.5 py-0.5 rounded text-xs font-semibold ${colorClass}`}>
-      {priority?.toUpperCase()}
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider border shadow-sm ${currentStyle}`}>
+      {priority || 'UNKNOWN'}
     </span>
   );
 };
