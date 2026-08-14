@@ -16,3 +16,19 @@ frontend
 docker compose exec frontend npm install axios react-router-dom lucide-react
 
 docker compose exec frontend npm install tailwindcss @tailwindcss/vite
+
+
+put seed data from seed.py file
+docker compose exec backend python seed.py
+
+
+check tasks endpoint 
+
+/tasks?page=1&limit=20
+/tasks?status=pending
+/tasks?priority=high
+/tasks?assignee=me
+/tasks?assignee=2
+/tasks?search=shopify
+/tasks?sort_by=due_date&sort_order=asc
+
