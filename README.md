@@ -32,3 +32,5 @@ check tasks endpoint
 /tasks?search=shopify
 /tasks?sort_by=due_date&sort_order=asc
 
+
+docker compose exec frontend npm install react-router-dom axios lucide-react date-fns clsx tailwind-merge

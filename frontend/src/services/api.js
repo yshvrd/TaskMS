@@ -1,29 +1,29 @@
-import axios from "axios";
+import axios from 'axios';
 
 const api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-// Attach token
+// Automatically attach token to requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
-
+  const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-
   return config;
 });
 
-// Handle authentication failures
+// Handle global responses & 401s
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("access_token");
-      window.location.href = "/login";
+      localStorage.removeItem('token');
+      window.location.href = '/login';
     }
-
     return Promise.reject(error);
   }
 );

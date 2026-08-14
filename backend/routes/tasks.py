@@ -136,6 +136,10 @@ def create_task(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # Enforce assignment rules: normal members always assign to themselves
+    if current_user.role != "admin":
+        data.assigned_to = current_user.id
+
     task = Task(**data.model_dump())
     db.add(task)
     db.commit()

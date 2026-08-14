@@ -1,25 +1,28 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import ProtectedRoute from "./components/ProtectedRoute";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import TaskList from './pages/TaskList';
+import TaskDetails from './pages/TaskDetails';
+import Login from './pages/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 
-export default function App() {
+function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        
+        <Route element={<ProtectedRoute />}>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/tasks" element={<TaskList />} />
+            <Route path="/tasks/:id" element={<TaskDetails />} />
+          </Route>
+        </Route>
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
+
+export default App;
