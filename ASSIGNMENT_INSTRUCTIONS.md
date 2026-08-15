@@ -1,39 +1,41 @@
-Task: Internal Task & Management Dashboard
-Objective
+# Task: Internal Task & Management Dashboard
+
+## Objective
 Build a small internal management and task-tracking application that demonstrates your ability to develop both the frontend and backend, work with APIs, structure a project properly, and create reusable components and services.
 
 The application should allow a team to create, manage, track, and view tasks from a central dashboard.
 
 
 
-Recommended Tech Stack
+## Recommended Tech Stack
 
-Frontend
-React
-Vite
-Tailwind CSS
+### Frontend
+- React
+- Vite
+- Tailwind CSS
 
-Backend
-Python + FastAPI or
-Node.js + Express
+### Backend
+- Python + FastAPI or
+- Node.js + Express
 
-Database
-PostgreSQL preferred
-SQLite is acceptable for the assignment
+### Database
+- PostgreSQL preferred
+- SQLite is acceptable for the assignment
 
 
 
-Requirements
+## Requirements
 
 1. Dashboard
+
 Create a dashboard showing:
 
-Total Tasks
-Pending Tasks
-In Progress Tasks
-Completed Tasks
-Overdue Tasks
-Tasks assigned to the current user
+- Total Tasks
+- Pending Tasks
+- In Progress Tasks
+- Completed Tasks
+- Overdue Tasks
+- Tasks assigned to the current user
 
 The dashboard should provide a quick overview of the team's work.
 
@@ -43,27 +45,27 @@ The dashboard should provide a quick overview of the team's work.
 
 Users should be able to:
 
-Create a task
-Edit a task
-Delete a task
-Assign a task to a team member
-Set task priority
-Set due date
-Change task status
-Add task description
-Add notes/comments
+- Create a task
+- Edit a task
+- Delete a task
+- Assign a task to a team member
+- Set task priority
+- Set due date
+- Change task status
+- Add task description
+- Add notes/comments
 
 Suggested Statuses
-Pending
-In Progress
-Completed
-Blocked
+- Pending
+- In Progress
+- Completed
+- Blocked
 
 Suggested Priorities
-Low
-Medium
-High
-Urgent
+- Low
+- Medium
+- High
+- Urgent
 
 
 
@@ -71,22 +73,22 @@ Urgent
 
 Create a task-management page containing:
 
-Task name
-Assigned user
-Priority
-Status
-Due date
-Created date
-Last updated date
+- Task name
+- Assigned user
+- Priority
+- Status
+- Due date
+- Created date
+- Last updated date
 
 Add:
 
-Search
-Status filter
-Priority filter
-Assignee filter
-Sorting
-Pagination
+- Search
+- Status filter
+- Priority filter
+- Assignee filter
+- Sorting
+- Pagination
 
 The filtering and pagination should preferably be handled through the backend API rather than loading all records into the frontend.
 
@@ -98,6 +100,7 @@ Create REST APIs for the application.
 
 Example endpoints:
 
+```bash
 GET    /api/tasks
 GET    /api/tasks/{id}
 POST   /api/tasks
@@ -109,23 +112,28 @@ POST   /api/users
 
 GET    /api/dashboard
 
+```
+
+
 The task API should support parameters such as:
 
+```bash
 /api/tasks?status=in_progress
 /api/tasks?priority=high
 /api/tasks?assignee=12
 /api/tasks?search=shopify
 /api/tasks?page=1&limit=20
+```
 
 The API should include:
 
-Request validation
-Proper HTTP status codes
-Error handling
-Pagination
-Filtering
-Search
-Database integration
+- Request validation
+- roper HTTP status codes
+- Error handling
+- Pagination
+- Filtering
+- Search
+- Database integration
 
 
 
@@ -135,13 +143,16 @@ Create an appropriate database structure.
 
 At minimum, include:
 
+```bash 
 Users
 id
 name
 email
 role
 created_at
+```
 
+```bash
 Tasks
 id
 title
@@ -152,13 +163,16 @@ assigned_to
 due_date
 created_at
 updated_at
+```
 
+```bash
 Comments / Notes
 id
 task_id
 user_id
 comment
 created_at
+```
 
 You should decide the appropriate relationships between these tables.
 
@@ -173,28 +187,30 @@ The application should be structured so that code can easily be reused in future
 For example:
 
 Frontend
+
 Create reusable components such as:
 
-Button
-Modal
-Input
-Select
-Table
-Pagination
-StatusBadge
-PriorityBadge
-TaskCard
+- Button
+- Modal
+- Input
+- Select
+- Table
+- Pagination
+- StatusBadge
+- PriorityBadge
+- TaskCard
 
 Backend
+
 Separate reusable functionality such as:
 
-API routes
-Services
-Database models
-Repositories
-Validation schemas
-Authentication
-Utilities
+- API routes
+- Services
+- Database models
+- Repositories
+- Validation schemas
+- Authentication
+- Utilities
 
 Do not put the entire application inside one or two large files.
 
@@ -229,14 +245,14 @@ Clicking a task should open a detailed view.
 
 The page should display:
 
-Task information
-Current status
-Priority
-Assigned user
-Due date
-Description
-Comments/notes
-Activity/history if implemented
+- Task information
+- Current status
+- Priority
+- Assigned user
+- Due date
+- Description
+- Comments/notes
+- Activity/history if implemented
 
 Users should be able to update the task from this page.
 
@@ -248,16 +264,16 @@ The application should look like a real internal business tool rather than a bas
 
 Focus on:
 
-Clean layout
-Responsive design
-Easy navigation
-Clear status indicators
-Good spacing
-Consistent components
-Loading states
-Empty states
-Error states
-Confirmation before destructive actions
+- Clean layout
+- Responsive design
+- Easy navigation
+- Clear status indicators
+- Good spacing
+- Consistent components
+- Loading states
+- Empty states
+- Error states
+- Confirmation before destructive actions
 
 Use Tailwind CSS for styling.
 
@@ -268,7 +284,7 @@ Use Tailwind CSS for styling.
 The project should have a clean structure.
 
 For example:
-
+```bash
 project/
 │
 ├── frontend/
@@ -292,33 +308,34 @@ project/
 │
 ├── README.md
 └── ...
+```
 
 The exact structure is up to you, but the application should clearly separate responsibilities.
 
 
 
-Bonus Features
+## Bonus Features
 
 These are optional and can be implemented if time permits:
 
-Login/authentication
-Role-based access
-Kanban task board
-Drag-and-drop tasks
-Task activity history
-File attachments
-Notifications
-Dark mode
-WebSocket/live task updates
-Docker setup
-Automated tests
-API documentation
-Background jobs
-Audit logs
+- Login/authentication
+- Role-based access
+- Kanban task board
+- Drag-and-drop tasks
+- Task activity history
+- File attachments
+- Notifications
+- Dark mode
+- WebSocket/live task updates
+- Docker setup
+- Automated tests
+- API documentation
+- Background jobs
+- Audit logs
 
 
 
-Deliverables
+## 3Deliverables
 
 Submit:
 
@@ -328,21 +345,21 @@ Provide the complete frontend and backend source code.
 2. README
 The README should contain:
 
-Project overview
-Tech stack
-Setup instructions
-Environment variables
-Database setup
-How to run frontend
-How to run backend
-API documentation
-Any assumptions made
+- Project overview
+- Tech stack
+- Setup instructions
+- Environment variables
+- Database setup
+- How to run frontend
+- How to run backend
+- API documentation
+- Any assumptions made
 
 3. Database
 Provide:
 
-Database schema/migrations
-Seed data if required
+- Database schema/migrations
+- Seed data if required
 
 4. Demo
 A short screen recording with audio demonstrating the application.
