@@ -77,7 +77,16 @@ const TaskList = () => {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({ page, limit, sort_by: sortBy, sort_order: sortOrder });
+      // OVERRIDE: Fetch 100 items if in board view to bypass normal pagination
+      const currentLimit = viewMode === 'board' ? 100 : limit;
+      
+      const params = new URLSearchParams({ 
+        page, 
+        limit: currentLimit, 
+        sort_by: sortBy, 
+        sort_order: sortOrder 
+      });
+      
       if (search) params.append('search', search);
       if (status) params.append('status', status);
       if (priority) params.append('priority', priority);
@@ -94,7 +103,7 @@ const TaskList = () => {
     if (initLoading) return;
     const delayDebounceFn = setTimeout(() => { fetchTasks(); }, 300);
     return () => clearTimeout(delayDebounceFn);
-  }, [search, status, priority, assignee, sortBy, sortOrder, page, initLoading]);
+  }, [search, status, priority, assignee, sortBy, sortOrder, page, initLoading, viewMode]);
 
   const handleFilterChange = (setter) => (e) => {
     setter(e.target.value);
@@ -170,17 +179,31 @@ const TaskList = () => {
           {/* VIEW TOGGLE */}
           <div className="flex bg-slate-200/60 dark:bg-slate-800/80 p-1 rounded-xl shadow-inner border border-slate-200 dark:border-slate-700">
             <button 
-              onClick={() => setViewMode('list')} 
-              className={`px-3 py-1.5 rounded-lg flex items-center text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
-            >
-              <ListIcon className="w-4 h-4 mr-1.5" /> List
-            </button>
-            <button 
-              onClick={() => setViewMode('board')} 
-              className={`px-3 py-1.5 rounded-lg flex items-center text-sm font-medium transition-all ${viewMode === 'board' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
-            >
-              <Kanban className="w-4 h-4 mr-1.5" /> Board
-            </button>
+            onClick={() => {
+              if (viewMode !== 'list') {
+                setTasks([]); // Clear board tasks to prevent layout shift
+                setLoading(true);
+                setViewMode('list');
+                setPage(1); // Reset back to page 1
+              }
+            }} 
+            className={`px-3 py-1.5 rounded-lg flex items-center text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
+          >
+            <ListIcon className="w-4 h-4 mr-1.5" /> List
+          </button>
+          
+          <button 
+            onClick={() => {
+              if (viewMode !== 'board') {
+                setTasks([]); // Clear the 10 list tasks to prevent visual pop-in
+                setLoading(true);
+                setViewMode('board');
+              }
+            }} 
+            className={`px-3 py-1.5 rounded-lg flex items-center text-sm font-medium transition-all ${viewMode === 'board' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200 dark:border-slate-600' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
+          >
+            <Kanban className="w-4 h-4 mr-1.5" /> Board
+          </button>
           </div>
 
           <Button onClick={() => setIsModalOpen(true)} className="shadow-sm shadow-indigo-200 dark:shadow-none hover:shadow-md transition-all active:scale-95 shrink-0">
