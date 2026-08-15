@@ -40,26 +40,29 @@ The absolute fastest and cleanest way to run TaskMS is using Docker Compose. It 
 * [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running on your machine.
 
 ### Quick Start
-1. **Clone the repository:**
+1. **Clone the repository**
    ```bash
-   git clone [https://github.com/your-username/taskms.git](https://github.com/your-username/taskms.git)
-   cd taskms
+   git clone [https://github.com/yshvrd/TaskMS.git](https://github.com/yshvrd/TaskMS.git)
+   cd TaskMS
    ```
-2. **Launch the application:**
-```bash
 
-```
-3. **Clone the repository:**
+2. **Create a .env file at backend/**
 ```bash
-docker-compose up --build
+# .env 
+DATABASE_URL=postgresql://taskflow:taskflow@db:5432/taskflow
+AUTH_SECRET_KEY=change-this-later
 ```
-4. **Install Dependencies**
-```bash
 
-```
-5. **Initialize DB and populate with seed data**
+3. **Launch the application**
 ```bash
+docker compose up --build
+```
 
+4. **Initialize DB and populate with seed data**
+```bash
+docker compose exec backend alembic upgrade head
+
+docker compose exec backend python seed-data.py
 ```
 
 5. **Access the app**
@@ -67,6 +70,11 @@ docker-compose up --build
 Frontend UI: http://localhost:5173
 
 API Docs (Swagger): http://localhost:8000/docs
+```
+
+6. **Stop the app**
+```bash
+docker compose down
 ```
 
 ---
